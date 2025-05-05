@@ -1,8 +1,16 @@
+variables <- tibble::tibble(dataid = c("oisst-tif",
+                                       "ghrsst-tif",
+                                       "NSIDC_SEAICE_PS_S25km",
+                                       "antarctica-amsr2-asi-s3125-tif",
+                                       rep("SEALEVEL_GLO_PHY_L4", 4)),
+                            varname = c(1, 1, 1, 1, "sla", "ugos", "vgos", "adt"))
 
-#dataid <- "oisst-tif"
-#dataid <- "ghrsst-tif"
-dataid <- "NSIDC_SEAICE_PS_S25km"
-varname <- 1
+
+
+for (i in seq_len(nrow(variables))) {
+var <- variables[i, ]
+dataid <- var$dataid[1L]
+varname <- var$varname[1L]
 
 ## GHRSST files on source.coop
 library(sooty)
@@ -32,7 +40,7 @@ d <- get_underway()
 d$day <- match(as.Date(d$datetime), as.Date(files$date))
 
 
-## subset to the files we can match to (Nuyina just docked this morning in Hobart)
+## subset to the files we can match to
 d$var <- varname
 nuy <- d[!is.na(d$day), c("longitude", "latitude", "datetime", "day", "var")]
 nuy$file <- files$source[nuy$day]
@@ -45,10 +53,13 @@ extractit <- function(x) {
   terra::setGDALconfig("AWS_NO_SIGN_REQUEST", "YES")
   terra::setGDALconfig("AWS_VIRTUAL_HOSTING", "FALSE")
 
+  if (!is.na(as.integer(var))) {
+    var <- as.integer(var)-1
+  }
   data <- terra::rast(x$file[1], var)
   xy <- cbind(x$longitude, x$latitude)
 
-  if (gdalraster::srs_is_geographic(terra::crs(data))) {
+  if (!gdalraster::srs_is_geographic(terra::crs(data))) {
     xy <- gdalraster::transform_xy(xy, srs_to = terra::crs(data), srs_from = "EPSG:4326")
   }
   terra::extract(data, xy)[,1L, drop = TRUE]
@@ -66,3 +77,4 @@ system.time({
 
 out <- tibble::tibble(datetime = nuy$datetime, value = unlist(l2))
 arrow::write_parquet(out, sprintf("%s.parquet", dataid))
+}
