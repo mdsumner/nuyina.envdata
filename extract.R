@@ -42,6 +42,7 @@ get_underway <- function(x) {
 
 ## reads a cached Parquet and gets more recent rows from the geoserver
 d <- get_underway()
+d <- dplyr::distinct(d, gml_id, .keep_all = T)
 
 
 ## exact match because have every day (not right up to the minute)
