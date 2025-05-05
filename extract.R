@@ -1,3 +1,11 @@
+.libPaths("/software/projects/pawsey0973/mdsumner/R/x86_64-pc-linux-gnu-library/")
+
+## new parallel framework for purrr, via mirai
+library(purrr)
+library(mirai)
+daemons(parallelly::availableCores())
+
+
 variables <- tibble::tibble(dataid = c("oisst-tif",
                                        "ghrsst-tif",
                                        "NSIDC_SEAICE_PS_S25km",
@@ -65,16 +73,12 @@ extractit <- function(x) {
   terra::extract(data, xy)[,1L, drop = TRUE]
 }
 
-## new parallel framework for purrr, via mirai
-library(purrr)
-library(mirai)
-daemons(parallelly::availableCores())
-### takes about 2 minutes, 1e6 ship locations, 725 days of voyaging
+### takes about 2 minutes for GHRSST, 1e6 ship locations, 725 days of voyaging
 
 system.time({
   l2 <- map(l, extractit, .parallel = TRUE)
 })
 
 out <- tibble::tibble(datetime = nuy$datetime, value = unlist(l2))
-arrow::write_parquet(out, sprintf("%s.parquet", dataid))
+arrow::write_parquet(out, sprintf("%s-%s.parquet", dataid, varname))
 }
