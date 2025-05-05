@@ -50,7 +50,7 @@ d$day <- match(as.Date(d$datetime), as.Date(files$date))
 
 ## subset to the files we can match to
 d$var <- varname
-nuy <- d[!is.na(d$day), c("longitude", "latitude", "datetime", "day", "var")]
+nuy <- d[!is.na(d$day), c("longitude", "latitude", "datetime", "day", "var", "gml_id")]
 nuy$file <- files$source[nuy$day]
 l <- split(nuy, nuy$day)
 ## function to apply in parallel to get GHRSST on underway
@@ -79,6 +79,6 @@ system.time({
   l2 <- map(l, extractit, .parallel = TRUE)
 })
 
-out <- tibble::tibble(datetime = nuy$datetime, value = unlist(l2))
+out <- tibble::tibble(gml_id = nuy$gml_id, value = unlist(l2))
 arrow::write_parquet(out, sprintf("%s-%s.parquet", dataid, varname))
 }
