@@ -80,5 +80,5 @@ system.time({
 })
 
 out <- tibble::tibble(gml_id = nuy$gml_id, value = unlist(l2))
-arrow::write_parquet(out, sprintf("%s-%s.parquet", dataid, varname))
+arrow::write_parquet(out, sprintf("%s_%s.parquet", dataid, varname))
 }
