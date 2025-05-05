@@ -27,3 +27,4 @@ uwy <- get_underway()
 uwy <- dplyr::distinct(uwy, gml_id, .keep_all = T)
 
 d <- dplyr::inner_join(d, uwy, "gml_id")
+arrow::write_parquet(d, "envdata.parquet")
