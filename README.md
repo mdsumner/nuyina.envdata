@@ -18,6 +18,12 @@ So in R
 
 ``` r
 env <- arrow::read_parquet("https://projects.pawsey.org.au/idea-objects/nuyina-envdata.parquet")
+names(env)  ## sst, sea ice, altimetry, various
+#> [1] "gml_id"                           "NSIDC_SEAICE_PS_S25km_1"         
+#> [3] "SEALEVEL_GLO_PHY_L4_adt"          "SEALEVEL_GLO_PHY_L4_sla"         
+#> [5] "SEALEVEL_GLO_PHY_L4_ugos"         "SEALEVEL_GLO_PHY_L4_vgos"        
+#> [7] "antarctica-amsr2-asi-s3125-tif_1" "ghrsst-tif_1"                    
+#> [9] "oisst-tif_1"
 
 get_underway <- function(x) {
   ## read the bulk
