@@ -1,4 +1,5 @@
 files <- fs::dir_ls(regexp = ".*parquet$")
+files <- setdiff(files, "envdata.parquet")
 names <- gsub("\\.parquet", "", basename(files))
 l <- lapply(files, \(.x) arrow::read_parquet(.x))
 for (i in seq_along(l)) {
@@ -26,5 +27,5 @@ get_underway <- function(x) {
 uwy <- get_underway()
 uwy <- dplyr::distinct(uwy, gml_id, .keep_all = T)
 
-d <- dplyr::inner_join(d, uwy, "gml_id")
-arrow::write_parquet(d, "envdata.parquet")
+
+arrow::write_parquet(uwy, "envdata.parquet")
