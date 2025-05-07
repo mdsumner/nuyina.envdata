@@ -6,3 +6,5 @@
 .quarto
 .RData
 *.parquet
+slurm*.out
+*.Rout

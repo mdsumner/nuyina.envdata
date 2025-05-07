@@ -6,12 +6,12 @@ library(mirai)
 daemons(parallelly::availableCores())
 
 
-variables <- tibble::tibble(dataid = c("oisst-tif",
+variables <- tibble::tibble(dataid = c("esacci-tif", "oisst-tif",
                                        "ghrsst-tif",
                                        "NSIDC_SEAICE_PS_S25km",
                                        "antarctica-amsr2-asi-s3125-tif",
                                        rep("SEALEVEL_GLO_PHY_L4", 4)),
-                            varname = c(1, 1, 1, 1, "sla", "ugos", "vgos", "adt"))
+                            varname = c(1, 1, 1, 1, 1, "sla", "ugos", "vgos", "adt"))
 
 
 
@@ -47,7 +47,9 @@ d <- dplyr::distinct(d, gml_id, .keep_all = T)
 
 ## exact match because have every day (not right up to the minute)
 d$day <- match(as.Date(d$datetime), as.Date(files$date))
-
+if (dataid == "esacci-tif") {
+  d$day <- findInterval(d$datetime, files$date)
+}
 
 ## subset to the files we can match to
 d$var <- varname
@@ -58,9 +60,9 @@ l <- split(nuy, nuy$day)
 extractit <- function(x) {
   var <- NULL
   if (!is.null(x$var) && !is.na(x$var[1])) var <- x$var[1]
-  terra::setGDALconfig("AWS_S3_ENDPOINT"  , "projects.pawsey.org.au")
-  terra::setGDALconfig("AWS_NO_SIGN_REQUEST", "YES")
-  terra::setGDALconfig("AWS_VIRTUAL_HOSTING", "FALSE")
+#  terra::setGDALconfig("AWS_S3_ENDPOINT"  , "projects.pawsey.org.au")
+#  terra::setGDALconfig("AWS_NO_SIGN_REQUEST", "YES")
+#  terra::setGDALconfig("AWS_VIRTUAL_HOSTING", "FALSE")
 
   if (!is.na(as.integer(var))) {
     var <- as.integer(var)-1
