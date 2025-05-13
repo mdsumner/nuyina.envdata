@@ -15,17 +15,6 @@ variables <- tibble::tibble(dataid = c("esacci-tif", "oisst-tif",
 
 
 
-for (i in seq_len(nrow(variables))) {
-var <- variables[i, ]
-dataid <- var$dataid[1L]
-varname <- var$varname[1L]
-
-## GHRSST files on source.coop
-library(sooty)
-ds <- dataset(); ds@id <- dataid
-files <- ds@source
-
-
 ## idea extract for Nuyina
 
 ## Read Nuyina underway (1-minute interval data collection from the ocean)
@@ -45,6 +34,20 @@ d <- get_underway()
 d <- dplyr::distinct(d, gml_id, .keep_all = T)
 
 
+
+for (i in seq_len(nrow(variables))) {
+var <- variables[i, ]
+dataid <- var$dataid[1L]
+varname <- var$varname[1L]
+
+## GHRSST files on source.coop
+library(sooty)
+ds <- dataset(); ds@id <- dataid
+files <- ds@source
+
+
+
+
 ## exact match because have every day (not right up to the minute)
 d$day <- match(as.Date(d$datetime), as.Date(files$date))
 if (dataid == "esacci-tif") {
@@ -60,9 +63,6 @@ l <- split(nuy, nuy$day)
 extractit <- function(x) {
   var <- NULL
   if (!is.null(x$var) && !is.na(x$var[1])) var <- x$var[1]
-#  terra::setGDALconfig("AWS_S3_ENDPOINT"  , "projects.pawsey.org.au")
-#  terra::setGDALconfig("AWS_NO_SIGN_REQUEST", "YES")
-#  terra::setGDALconfig("AWS_VIRTUAL_HOSTING", "FALSE")
 
   if (!is.na(as.integer(var))) {
     var <- as.integer(var)-1
@@ -78,9 +78,13 @@ extractit <- function(x) {
 
 ### takes about 2 minutes for GHRSST, 1e6 ship locations, 725 days of voyaging
 
-system.time({
+print(varname)
+
+st <- system.time({
   l2 <- map(l, extractit, .parallel = TRUE)
 })
+
+print(st)
 
 out <- tibble::tibble(gml_id = nuy$gml_id, value = unlist(l2))
 arrow::write_parquet(out, sprintf("%s_%s.parquet", dataid, gsub("-", "_", varname)))
