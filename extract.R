@@ -6,12 +6,12 @@ library(mirai)
 daemons(parallelly::availableCores())
 
 
-variables <- tibble::tibble(dataid = c("esacci-tif", "oisst-tif",
+variables <- tibble::tibble(dataid = c("esacci-oc-l3s-chlor-a-merged-5day", "esacci-oc-l3s-chlor-a-merged-monthly", "oisst-tif",
                                        "ghrsst-tif",
                                        "NSIDC_SEAICE_PS_S25km",
                                        "antarctica-amsr2-asi-s3125-tif",
                                        rep("SEALEVEL_GLO_PHY_L4", 4)),
-                            varname = c(1, 1, 1, 1, 1, "sla", "ugos", "vgos", "adt"))
+                            varname = c(1, 1, 1, 1, 1, 1, "sla", "ugos", "vgos", "adt"))
 
 
 
